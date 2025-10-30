@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="es">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Control de Entrada - Oficina</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      font-family: "Inter", "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #F5E6D3 0%, #E8D5B7 100%);
+      color: #3E2723;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      min-height: 100%;
+    }
+
+    html {
+      height: 100%;
+    }
+
+    header {
+      background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+      color: white;
+      text-align: center;
+      padding: 2rem 1rem;
+      box-shadow: 0 4px 20px rgba(139, 69, 19, 0.3);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 8px 32px rgba(139, 69, 19, 0.15);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(139, 69, 19, 0.25);
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 0 15px;
+      }
+      
+      .full-width {
+        grid-column: 1;
+      }
+    }
+
+    h2 {
+      color: #8B4513;
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 25px;
+      position: relative;
+    }
+
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, #D4AF37, #F4D03F);
+      border-radius: 2px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    label {
+      font-weight: 600;
+      color: #5D4037;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    input, select {
+      padding: 14px 16px;
+      border: 2px solid #E0E0E0;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background: #FAFAFA;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #D4AF37;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+    }
+
+    button {
+      background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%);
+      color: #3E2723;
+      border: none;
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #B8941F 0%, #D4AF37 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+    }
+
+    button:disabled {
+      background: #E0E0E0;
+      color: #9E9E9E;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+      color: white;
+      padding: 25px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 6px 25px rgba(139, 69, 19, 0.3);
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #D4AF37;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(139, 69, 19, 0.1);
+    }
+
+    th, td {
+      padding: 15px 12px;
+      text-align: center;
+      border-bottom: 1px solid #E8D5B7;
+    }
+
+    th {
+      background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+      color: white;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.9rem;
+    }
+
+    tbody tr {
+      transition: background-color 0.2s ease;
+    }
+
+    tbody tr:hover {
+      background-color: #FFF8E1;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #FAFAFA;
+    }
+
+    .turno {
+      background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%);
+      color: #3E2723;
+      padding: 15px 20px;
+      margin-top: 20px;
+      font-weight: 600;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+
+    .error-message {
+      background: #fee;
+      border: 1px solid #fcc;
+      color: #c33;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+
+    .limit-warning {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      color: #856404;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <header>
+   <h1 id="pageTitle">📋 Control de Entrada - Oficina</h1>
+  </header>
+  <div class="container">
+   <div class="card">
+    <h2 id="formTitle">Registro de Visitantes</h2>
+    <form id="registroForm"><label for="nombre">Nombre y Apellido:</label> <input type="text" id="nombre" required placeholder="Ej: Juan Pérez"> <label for="cedula">Cédula (opcional):</label> <input type="text" id="cedula" placeholder="Ej: 001-1234567-8"> <label for="telefono">Teléfono:</label> <input type="tel" id="telefono" required placeholder="Ej: 809-555-5555"> <label for="email">Correo Electrónico:</label> <input type="email" id="email" required placeholder="Ej: micorreo@correo.com"> <label for="servicio">Tipo de Servicio:</label> <select id="servicio" required> <option value="">Seleccione...</option> <option value="Cedulación">Cedulación</option> <option value="Actas">Servicios de Actas</option> <option value="Transcripciones">Transcripciones</option> <option value="Otro">Otro</option> </select> <button type="submit" id="submitBtn">Registrar Entrada</button>
+     <div id="errorMessage" class="error-message" style="display:none;"></div>
+     <div id="limitWarning" class="limit-warning" style="display:none;"></div>
+    </form>
+    <div id="turnoActual" class="turno" style="display:none;"></div>
+   </div>
+   <div class="card">
+    <h2 id="statsTitle">Estadísticas de Visitantes</h2>
+    <div class="stats-grid">
+     <div class="stat-card">
+      <div class="stat-number" id="todayCount">
+       0
+      </div>
+      <div class="stat-label">
+       Hoy
+      </div>
+     </div>
+     <div class="stat-card">
+      <div class="stat-number" id="weekCount">
+       0
+      </div>
+      <div class="stat-label">
+       Esta Semana
+      </div>
+     </div>
+     <div class="stat-card">
+      <div class="stat-number" id="monthCount">
+       0
+      </div>
+      <div class="stat-label">
+       Este Mes
+      </div>
+     </div>
+     <div class="stat-card">
+      <div class="stat-number" id="totalCount">
+       0
+      </div>
+      <div class="stat-label">
+       Total
+      </div>
+     </div>
+    </div>
+   </div>
+   <div class="card full-width">
+    <h2 id="tableTitle">Listado de Personas Registradas</h2>
+    <div id="loadingIndicator" class="loading" style="display:none;">
+     Cargando registros...
+    </div>
+    <table id="tablaRegistros">
+     <thead>
+      <tr>
+       <th>Turno</th>
+       <th>Nombre</th>
+       <th>Servicio</th>
+       <th>Teléfono</th>
+       <th>Fecha</th>
+       <th>Hora</th>
+      </tr>
+     </thead>
+     <tbody></tbody>
+    </table>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      page_title: "📋 Control de Entrada - Oficina",
+      form_title: "Registro de Visitantes",
+      submit_button_text: "Registrar Entrada",
+      stats_title: "Estadísticas de Visitantes",
+      table_title: "Listado de Personas Registradas",
+      background_color: "#F5E6D3",
+      surface_color: "#ffffff",
+      text_color: "#3E2723",
+      primary_color: "#8B4513",
+      secondary_action_color: "#D4AF37"
+    };
+
+    let allRecords = [];
+
+    const dataHandler = {
+      onDataChanged(data) {
+        allRecords = data.sort((a, b) => b.timestamp - a.timestamp);
+        renderTable();
+        updateTurnoDisplay();
+        updateStatistics();
+      }
+    };
+
+    function renderTable() {
+      const tbody = document.getElementById('tablaRegistros').querySelector('tbody');
+      tbody.innerHTML = '';
+      
+      allRecords.forEach(record => {
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+          <td>${record.turno}</td>
+          <td>${record.nombre}</td>
+          <td>${record.servicio}</td>
+          <td>${record.telefono}</td>
+          <td>${record.fecha || new Date(record.timestamp).toLocaleDateString()}</td>
+          <td>${record.hora}</td>
+        `;
+        tbody.appendChild(fila);
+      });
+    }
+
+    function updateStatistics() {
+      const now = new Date();
+      const today = now.toDateString();
+      
+      // Calcular inicio de semana (domingo)
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay());
+      startOfWeek.setHours(0, 0, 0, 0);
+      
+      // Calcular inicio de mes
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const todayCount = allRecords.filter(record => {
+        const recordDate = new Date(record.timestamp);
+        return recordDate.toDateString() === today;
+      }).length;
+
+      const weekCount = allRecords.filter(record => {
+        const recordDate = new Date(record.timestamp);
+        return recordDate >= startOfWeek;
+      }).length;
+
+      const monthCount = allRecords.filter(record => {
+        const recordDate = new Date(record.timestamp);
+        return recordDate >= startOfMonth;
+      }).length;
+
+      document.getElementById('todayCount').textContent = todayCount;
+      document.getElementById('weekCount').textContent = weekCount;
+      document.getElementById('monthCount').textContent = monthCount;
+      document.getElementById('totalCount').textContent = allRecords.length;
+    }
+
+    function updateTurnoDisplay() {
+      const turnoDiv = document.getElementById('turnoActual');
+      if (allRecords.length > 0) {
+        const ultimoTurno = Math.max(...allRecords.map(r => r.turno));
+        turnoDiv.textContent = `Turno actual: ${ultimoTurno}`;
+        turnoDiv.style.display = 'block';
+      } else {
+        turnoDiv.style.display = 'none';
+      }
+    }
+
+    async function onConfigChange(config) {
+      document.getElementById('pageTitle').textContent = config.page_title || defaultConfig.page_title;
+      document.getElementById('formTitle').textContent = config.form_title || defaultConfig.form_title;
+      document.getElementById('submitBtn').textContent = config.submit_button_text || defaultConfig.submit_button_text;
+      document.getElementById('statsTitle').textContent = config.stats_title || defaultConfig.stats_title;
+      document.getElementById('tableTitle').textContent = config.table_title || defaultConfig.table_title;
+
+      const primaryColor = config.primary_color || defaultConfig.primary_color;
+      const backgroundColor = config.background_color || defaultConfig.background_color;
+      const surfaceColor = config.surface_color || defaultConfig.surface_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const secondaryActionColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+
+      // Aplicar colores dinámicamente
+      document.body.style.background = `linear-gradient(135deg, ${backgroundColor} 0%, #E8D5B7 100%)`;
+      document.body.style.color = textColor;
+      document.querySelector('header').style.background = `linear-gradient(135deg, ${primaryColor} 0%, #A0522D 100%)`;
+      document.querySelectorAll('.card').forEach(card => card.style.background = surfaceColor);
+      document.querySelectorAll('h2').forEach(h2 => h2.style.color = primaryColor);
+      document.querySelectorAll('th').forEach(th => th.style.background = `linear-gradient(135deg, ${primaryColor} 0%, #A0522D 100%)`);
+      document.querySelector('button').style.background = `linear-gradient(135deg, ${secondaryActionColor} 0%, #F4D03F 100%)`;
+      document.querySelector('.turno').style.background = `linear-gradient(135deg, ${secondaryActionColor} 0%, #F4D03F 100%)`;
+    }
+
+    async function initializeApp() {
+      const initResult = await window.dataSdk.init(dataHandler);
+      if (!initResult.isOk) {
+        console.error("Failed to initialize data SDK");
+        return;
+      }
+
+      await window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                window.elementSdk.config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.surface_color || defaultConfig.surface_color,
+              set: (value) => {
+                window.elementSdk.config.surface_color = value;
+                window.elementSdk.setConfig({ surface_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                window.elementSdk.config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.primary_color || defaultConfig.primary_color,
+              set: (value) => {
+                window.elementSdk.config.primary_color = value;
+                window.elementSdk.setConfig({ primary_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+              set: (value) => {
+                window.elementSdk.config.secondary_action_color = value;
+                window.elementSdk.setConfig({ secondary_action_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["page_title", config.page_title || defaultConfig.page_title],
+          ["form_title", config.form_title || defaultConfig.form_title],
+          ["submit_button_text", config.submit_button_text || defaultConfig.submit_button_text],
+          ["stats_title", config.stats_title || defaultConfig.stats_title],
+          ["table_title", config.table_title || defaultConfig.table_title]
+        ])
+      });
+
+      await onConfigChange(window.elementSdk.config);
+    }
+
+    const form = document.getElementById('registroForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMessage = document.getElementById('errorMessage');
+    const limitWarning = document.getElementById('limitWarning');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (allRecords.length >= 999) {
+        limitWarning.textContent = 'Se ha alcanzado el límite máximo de 999 registros. Por favor, elimine algunos registros antes de continuar.';
+        limitWarning.style.display = 'block';
+        return;
+      }
+
+      errorMessage.style.display = 'none';
+      limitWarning.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Registrando...';
+
+      const nombre = document.getElementById('nombre').value.trim();
+      const cedula = document.getElementById('cedula').value.trim();
+      const telefono = document.getElementById('telefono').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const servicio = document.getElementById('servicio').value;
+      const now = new Date();
+      const hora = now.toLocaleTimeString();
+      const fecha = now.toLocaleDateString();
+      const turno = allRecords.length > 0 ? Math.max(...allRecords.map(r => r.turno)) + 1 : 1;
+
+      const newRecord = {
+        turno,
+        nombre,
+        cedula,
+        telefono,
+        email,
+        servicio,
+        hora,
+        fecha,
+        timestamp: now.getTime()
+      };
+
+      const result = await window.dataSdk.create(newRecord);
+
+      if (result.isOk) {
+        form.reset();
+        submitBtn.textContent = window.elementSdk.config.submit_button_text || defaultConfig.submit_button_text;
+      } else {
+        errorMessage.textContent = 'Error al registrar la entrada. Por favor, intente nuevamente.';
+        errorMessage.style.display = 'block';
+        submitBtn.textContent = window.elementSdk.config.submit_button_text || defaultConfig.submit_button_text;
+      }
+
+      submitBtn.disabled = false;
+    });
+
+    initializeApp();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'996b7d0965ba0c83',t:'MTc2MTgzMzM0NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
